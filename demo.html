@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Camera and Image to Canvas Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+    <h1>Upload Image to Canvas Example</h1>
+    <canvas id="canvas2" width="640" height="480" style="border: 1px solid blue;"></canvas>
+    <input type="file" id="imageUpload">
+    <script>
+        const canvas = document.getElementById("canvas2");
+        const ctx = canvas.getContext("2d");
+        const imageUpload = document.getElementById("imageUpload");
+
+        imageUpload.addEventListener("change", () => {
+            const image = new Image();
+            image.onload = () => {
+                const x = canvas.width - image.width;
+                const y = canvas.height - image.height;
+                ctx.drawImage(image, x, y);
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x, y, image.width, image.height);
+            };
+            image.src = URL.createObjectURL(imageUpload.files[0]);
+        });
+    </script>
+
+    <h1>Camera and Image to Canvas Example</h1>
+    <input type="file" id="file-input">
+    <video id="video" width="640" height="480" autoplay style="display: none;"></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <script>
+        var imageObj = null;
+
+        // 檢查是否支援 getUserMedia() 方法
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            // 啟動相機
+            navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+                var video = document.getElementById('video');
+                video.srcObject = stream;
+                video.play();
+
+                // 在 requestAnimationFrame 回調函數中繪製視頻幀
+                var canvas = document.getElementById('canvas');
+                var context = canvas.getContext('2d');
+                requestAnimationFrame(function loop() {
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    if (imageObj !== null) {
+                        var x = canvas.width - imageObj.width;
+                        var y = canvas.height - imageObj.height;
+                        context.drawImage(imageObj, x, y);
+                        context.strokeStyle = "red";
+                        context.lineWidth = 1;
+                        context.strokeRect(x, y, imageObj.width, imageObj.height);
+                    }
+                    requestAnimationFrame(loop);
+                });
+            }).catch(function (error) {
+                // 處理異常
+                alert('啟動相機失敗：' + error.message);
+            });
+        } else {
+            // 當瀏覽器不支援 getUserMedia() 方法時彈出警告
+            alert('瀏覽器不支援相機功能');
+        }
+
+        // 讀取選擇的圖片
+        var fileInput = document.getElementById('file-input');
+        fileInput.addEventListener('change', function (event) {
+            var file = event.target.files[0];
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                var img = new Image();
+                img.src = event.target.result;
+                // 在圖片加載完成後將圖片存入全局變量 imageObj
+                img.onload = function () {
+                    imageObj = img;
+                };
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
+
+    <br>
+    <br>
+    <br>
+</body>
+
+</html>
